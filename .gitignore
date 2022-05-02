@@ -2,4 +2,4 @@
 
 # This contains the bot token. Ignoring it allows the repo to be public 
 # without compromising the bot security
-botsuff.env
+botstuff.env
