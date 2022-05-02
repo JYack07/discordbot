@@ -23,7 +23,7 @@ async def on_ready():
 async def on_message(message):
     print('Message from {0.author}: {0.content}'.format(message))
 
-    if message.content.lower().startswith('hello there'):
+    if 'hello there' in message.content.lower():
         await message.channel.send(file=
                 discord.File(fp=open('GIFs/general-kenobi.gif', 'rb')))
             
