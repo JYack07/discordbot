@@ -1,5 +1,13 @@
 import discord
 
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv('./botstuff.env')
+
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+
 class MyClient(discord.Client):
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
@@ -14,4 +22,4 @@ class MyClient(discord.Client):
                     discord.File(fp=open('GIFs/general-kenobi.gif', 'rb')))
 
 client = MyClient()
-client.run('OTcwNDc5NjI0MzMxMDk2MTE1.Ym8jlQ.bkDThAXsGQbedL6KxfacozL5Zac')
+client.run(DISCORD_TOKEN)
