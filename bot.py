@@ -1,3 +1,4 @@
+
 #!/bin/python3
 import discord
 import os
@@ -22,8 +23,6 @@ async def afk(ctx):
     global afk_peeps
     if ctx.author not in afk_peeps.keys():
         afk_peeps[ctx.author] = ctx.message.content
-    else:
-        afk_peeps.pop(ctx.author)
     
     # Allows the user to know that the bot actually knows they're afk
     await ctx.message.add_reaction('\N{THUMBS UP SIGN}')
@@ -31,7 +30,6 @@ async def afk(ctx):
    
 @bot.command(name='ping')
 async def ping(ctx):
-    print('Entered function ping()!')
     await ctx.send('pong')
 
 # Confirms that the bot is logged on and ready to be used                       
@@ -44,10 +42,49 @@ async def on_ready():
 @bot.event                                                                      
 async def on_message(message):                                                  
     print('Message from {0.author}: {0.content}'.format(message))               
-                                                                                 
+        
+    # A funny                                                                      
     if 'hello there' in message.content.lower():                                
         await message.channel.send(file=                                        
                 discord.File(fp=open('GIFs/general-kenobi.gif', 'rb')))
+
+    # Removes AFK when person messages in chat
+    if message.author in afk_peeps:
+        afk_peeps.pop(message.author)
+        if str(message.author.nick) != "None":
+            msg = str(message.author.nick) 
+        else:
+           msg = str(message.author.name)
+        msg += ", your AFK has been removed."
+        
+        # Creates a discord rich text embed
+        embed = discord.Embed(
+            title="AFK Removed",
+            url="",
+            description=msg,
+            color=discord.Color.blue())
+        
+        await message.channel.send(embed=embed)
+    
+    # When someone pings an afk user, it tells the author the reason they are afk
+    for user in message.mentions:
+        if user in afk_peeps:
+            if str(user.nick) != "None":
+                afkmsg = str(user.nick) 
+            else:
+                afkmsg = str(user.name)
+                
+            afkmsg += " is AFK right now."
+            reason = "Reason: "
+            reason += str(afk_peeps[user]).replace('$afk ', '')
+            
+            embed=discord.Embed(
+                title=afkmsg,
+                url="",
+                description=reason,
+                color=discord.Color.blue())
+            
+            await message.channel.send(embed=embed)
 
     # Required in order for commands to be processed due to overriding 
     # on_message.
