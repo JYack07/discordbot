@@ -47,7 +47,7 @@ async def gif(ctx):
             color=discord.Color.blue())
         await ctx.send(embed=embed)
 
-# Usage: //afk <reason> 
+# Usage: $afk <reason> 
 # Inserts the user into the afk_peeps dictionary, along with their reason 
 # for being afk. If this user is mentioned, relay a message stating that user's
 # reason.
