@@ -8,6 +8,7 @@ import json
 from http import client
 from discord.ext import commands
 from dotenv import load_dotenv
+from PyDictionary import PyDictionary
 
 load_dotenv('./botstuff.env')
 
@@ -15,6 +16,27 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GIF_API = os.getenv("GIF_API")
 
 bot = commands.Bot(command_prefix='$')
+
+
+
+dictionary=PyDictionary()
+@bot.command(name="defn")
+async def defn(ctx, word):
+    define=dictionary.meaning(word)
+    word = word[0].upper() + word[1:len(word)]
+    meanings = ""
+    for s in define:
+        meanings += "**__" + s + "__**:\n"
+        for d in define[s]:
+            meanings += "   - " + d + "\n"
+        
+    embed=discord.Embed(
+        title=word + ":",
+        url="",
+        description=meanings,
+        color=discord.Color.blue()
+    )
+    await ctx.send(embed=embed)
 
 
 # Usage: $gif <seach_term>
