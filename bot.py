@@ -17,7 +17,18 @@ GIF_API = os.getenv("GIF_API")
 
 bot = commands.Bot(command_prefix='$')
 
-
+@bot.command(name="purge")
+async def purge(ctx, limit: int):
+    if limit > 100:
+        await ctx.send("Too many messages to purge")
+    else:
+        deleted = await ctx.channel.purge(limit=limit)
+        embed = discord.Embed(
+            title="Messages Deleted",
+            url="",
+            description='Deleted {} message(s)'.format(len(deleted)) + ' by ' + ctx.message.author.mention,
+            color=discord.Color.blue())
+        await ctx.send(embed=embed)
 
 dictionary=PyDictionary()
 @bot.command(name="defn")
@@ -37,7 +48,6 @@ async def defn(ctx, word):
         color=discord.Color.blue()
     )
     await ctx.send(embed=embed)
-
 
 # Usage: $gif <seach_term>
 # Searches for a gif using the tenor api and sends it to the chat 
@@ -81,8 +91,7 @@ async def afk(ctx):
     
     # Allows the user to know that the bot actually knows they're afk
     await ctx.message.add_reaction('\N{THUMBS UP SIGN}')
-
-   
+  
 @bot.command(name='ping')
 async def ping(ctx):
     await ctx.send('pong')
