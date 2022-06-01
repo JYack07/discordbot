@@ -1,4 +1,6 @@
 #!/bin/python3
+from pyexpat import ErrorString
+from re import X
 import discord
 import os
 import requests
@@ -17,19 +19,122 @@ GIF_API = os.getenv("GIF_API")
 
 bot = commands.Bot(command_prefix='$')
 
-@bot.command(name="purge")
-async def purge(ctx, limit: int):
-    if limit > 100:
-        await ctx.send("Too many messages to purge")
-    else:
-        deleted = await ctx.channel.purge(limit=limit)
-        embed = discord.Embed(
-            title="Messages Deleted",
-            url="",
-            description='Deleted {} message(s)'.format(len(deleted)) + ' by ' + ctx.message.author.mention,
-            color=discord.Color.blue())
+# Usage: $kick <@person> reason
+# kicks mentioned users
+@bot.command(name="kick")
+@commands.has_role("Admin 2")
+async def kick(ctx, member:discord.Member, *, reason=None):
+    await member.kick(reason=reason)
+    await ctx.message.add_reaction('\N{THUMBS UP SIGN}')
+        
+# ERROR FOR KICK
+@kick.error
+async def kick_error(ctx, error):
+    print ("{0}".format(error))
+    #creates embed
+    embed = discord.Embed(
+                title="Could Not Kick Member",
+                url="",
+                color=discord.Color.blue())
+    
+    # error checking for command errors
+    if isinstance(error, commands.MissingRole):
+        embed.description="Missing Admin Role"
+        await ctx.send(embed=embed)
+    elif isinstance(error, commands.BotMissingPermissions):
+        embed.description="Bot doesnt have permission"
+        await ctx.send(embed=embed)
+    elif isinstance(error, commands.MissingPermissions):
+        embed.description="Missing permissions"
         await ctx.send(embed=embed)
 
+# Usage: $ban <@person> reason
+# bans mentioned users
+@bot.command(name="ban")
+@commands.has_role("Admin")
+async def ban(ctx, member:discord.Member, *, reason=None):
+    await member.ban(reason=reason)
+    await ctx.message.add_reaction('\N{THUMBS UP SIGN}')
+
+# ERROR FOR BAN
+@ban.error
+async def ban_error(ctx, error):
+    print ("{0}".format(error))
+    #creates embed
+    embed = discord.Embed(
+                title="Could Not Ban Member",
+                url="",
+                color=discord.Color.blue())
+    
+    # error checking for command errors
+    if isinstance(error, commands.MissingRole):
+        embed.description="Missing Admin Role"
+        await ctx.send(embed=embed)
+    elif isinstance(error, commands.BotMissingPermissions):
+        embed.description="Bot doesnt have permission"
+        await ctx.send(embed=embed)
+    elif isinstance(error, commands.MissingPermissions):
+        embed.description="Missing permissions"
+        await ctx.send(embed=embed)
+        
+# Usage: $purge <num-chats>
+# Deletes num-chats amount of messages in channel used 
+@bot.command(name="purge")
+@commands.has_role("Admin")
+async def purge(ctx, *args: int):
+    # Creates embed
+    embed = discord.Embed(
+                title="Could Not Purge",
+                url="",
+                color=discord.Color.blue())
+    
+    # first two ifs check how many arguements are passed
+    if len(args) > 1:
+        embed.description="Too many arguements"
+        await ctx.send(embed=embed)
+    elif len(args) <= 0:
+        embed.description="Not enough arguements"
+        await ctx.send(embed=embed)
+    
+    # Last statement does the deleting
+    else:
+        limit = args[0]
+        
+        # Checks if the limit is greater than 100
+        if limit > 100:
+            embed.description="Integer must be less than or equal to 100"
+            await ctx.send(embed=embed)
+            
+        # Does the deletions and sends a message
+        else:
+            deleted = await ctx.channel.purge(limit=limit)
+            embed.title="Purge Completed"
+            embed.description='Deleted {} message(s)'.format(len(deleted)) + ' by ' + ctx.message.author.mention
+            
+            await ctx.send(embed=embed)
+        
+# ERROR FOR PURGE
+@purge.error
+async def purge_error(ctx, error):
+    print ("{0}".format(error))
+    #creates embed
+    embed = discord.Embed(
+                title="Could Not Purge",
+                url="",
+                color=discord.Color.blue())
+    
+    # error checking for command errors
+    if isinstance(error, commands.MissingRole):
+        embed.description="Missing Admin Role"
+        await ctx.send(embed=embed)
+    elif isinstance(error, commands.BadArgument):
+        embed.description="Incorrect input, please enter an integer value"
+        await ctx.send(embed=embed)
+        
+        
+
+# Usage: $defn <word>
+# Sends the dictionary meaning of word
 dictionary=PyDictionary()
 @bot.command(name="defn")
 async def defn(ctx, word):
