@@ -6,6 +6,7 @@ import os
 import requests
 import random
 import json
+import time
 
 from http import client
 from discord.ext import commands
@@ -19,10 +20,51 @@ GIF_API = os.getenv("GIF_API")
 
 bot = commands.Bot(command_prefix='$')
 
+# Usage $ewwp_set <channel ids>
+vcs = {}
+@bot.command(name="ewwp_set")
+async def ewwp_set(ctx, channels:str):
+    global vcs
+    i = 0
+    c_list = channels.split(",")
+    for x in c_list:
+        vcs[i]=bot.get_channel(int(x))
+        i = i + 1
+        
+    
+
+# Usage $ewwp <@person>
+# Moves user between voice channels to be annoying or get their attention
+
+@bot.command(name="ewwp")
+@commands.has_role("Admin")
+async def ewwp(ctx, member:discord.Member, *, reason=None):
+    global vcs
+    num = 5
+    embed = discord.Embed(
+                title="Initializing Emergency Wakey Wakey Protocol",
+                description="Please stand by...",
+                color=discord.Color.blue())
+    
+    await ctx.send(embed=embed)
+    
+    x = len(vcs)
+    for i in range(num):
+        for y in range(x):
+            await member.move_to(vcs[y])
+            time.sleep(0.25)
+
+    embed = discord.Embed(
+                title="Emergency Wakey Wakey Protocol Initialized",
+                description="Wakey wakey",
+                color=discord.Color.blue())
+    
+    await ctx.send(embed=embed)
+
 # Usage: $kick <@person> reason
 # kicks mentioned users
 @bot.command(name="kick")
-@commands.has_role("Admin 2")
+@commands.has_role("Admin")
 async def kick(ctx, member:discord.Member, *, reason=None):
     await member.kick(reason=reason)
     await ctx.message.add_reaction('\N{THUMBS UP SIGN}')
