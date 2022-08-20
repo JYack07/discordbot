@@ -21,17 +21,17 @@ GIF_API = os.getenv("GIF_API")
 bot = commands.Bot(command_prefix='$')
 
 # Usage $ewwp_set <channel ids>
-vcs = {}
 @bot.command(name="ewwp_set")
 async def ewwp_set(ctx, channels:str):
     global vcs
+    vcs = {}
     i = 0
     c_list = channels.split(",")
     for x in c_list:
         vcs[i]=bot.get_channel(int(x))
         i = i + 1
-        
-    
+
+    await ctx.message.add_reaction('\N{THUMBS UP SIGN}')
 
 # Usage $ewwp <@person>
 # Moves user between voice channels to be annoying or get their attention
