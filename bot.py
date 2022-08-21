@@ -20,26 +20,51 @@ GIF_API = os.getenv("GIF_API")
 
 bot = commands.Bot(command_prefix='$')
 
+vcs = {}
 # Usage $ewwp_set <channel ids>
 @bot.command(name="ewwp_set")
 async def ewwp_set(ctx, channels:str):
-    global vcs
-    vcs = {}
+    embed = discord.Embed(
+                title="Could not set EWWP Channels",
+                url='',
+                color=discord.Color.red())
+    
+    # TODO: Fix channel integrity error handling
+    vc_list = []
+    num_vcs = 0
+    while discord.Guild.voice_channels[num_vcs].name != "":
+        vc_list[num_vcs] = discord.Guild.voice_channels[num_vcs].id
+        num_vcs += 1
+
     i = 0
     c_list = channels.split(",")
     for x in c_list:
+        is_valid = False
+        for vc in range(len(vc_list)):
+           if x == discord.Guild.voice_channels[vc].id:
+               is_valid = True
+
+        if is_valid is False:
+            embed.description="Invalid Channel ID"
+            await ctx.send(embed=embed)
+            return
+
         vcs[i]=bot.get_channel(int(x))
         i = i + 1
 
-    await ctx.message.add_reaction('\N{THUMBS UP SIGN}')
+    if i > 1:
+        await ctx.message.add_reaction('\N{THUMBS UP SIGN}')
+    else:
+        embed.description="Not enough channel arguments"
+        embed.color=discord.Color.red()
+        await ctx.send(embed=embed)
+        vcs = {}
 
 # Usage $ewwp <@person>
 # Moves user between voice channels to be annoying or get their attention
-
 @bot.command(name="ewwp")
 @commands.has_role("Admin")
 async def ewwp(ctx, member:discord.Member, *, reason=None):
-    global vcs
     num = 5
     embed = discord.Embed(
                 title="Initializing Emergency Wakey Wakey Protocol",
@@ -49,16 +74,23 @@ async def ewwp(ctx, member:discord.Member, *, reason=None):
     await ctx.send(embed=embed)
     
     x = len(vcs)
-    for i in range(num):
-        for y in range(x):
-            await member.move_to(vcs[y])
-            time.sleep(0.25)
+    if x > 1:
+        for i in range(num):
+            for y in range(x):
+                await member.move_to(vcs[y])
+                time.sleep(0.25)
 
-    embed = discord.Embed(
-                title="Emergency Wakey Wakey Protocol Initialized",
-                description="Wakey wakey",
-                color=discord.Color.blue())
+        embed = discord.Embed(
+                    title="Emergency Wakey Wakey Protocol Initialized",
+                    description="Wakey wakey",
+                    color=discord.Color.blue())
     
+    else:
+        embed = discord.Embed(
+                    title="Emergency Wakey Wakey Protocol Failed",
+                    description="Please use ewwp_set to select voice channels",
+                    color=discord.Color.red())
+
     await ctx.send(embed=embed)
 
 # Usage: $kick <@person> reason
